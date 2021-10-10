@@ -1,7 +1,7 @@
 import mysql.connector
 from bottle import route, run, template
 from bottle import get, post
-from bottle import request
+from bottle import request, redirect
 
 db = mysql.connector.connect(
     host = "localhost",
@@ -24,6 +24,7 @@ db = mysql.connector.connect(
     #print(x)
 
 #print(data[0])
+
 #string = data[0]
 #print(string)
 
@@ -33,6 +34,9 @@ mycursor = db.cursor()
 def get_index():
     return template("index")
 
+@route("/useraccount")
+def get_useraccount():
+    return template("useraccount")
 
 
 @post("/index")
@@ -57,5 +61,24 @@ def post_info():
 @get("/login")
 def get_login():
     return template("login")
+
+
+@post('/login')
+def post_login():
+    entered_username = request.forms['username']
+    password = request.forms['password']
+    try:  mycursor.execute("SELECT username, password from useraccounts WHERE password = " + password + " AND username = " +'"'+entered_username +'"')
+    except:  redirect('/')
+    
+    redirect('/useraccount')
+    
+
+    
+
+
+
+    
+
+
 
 run(host="localhost", port=8068)
