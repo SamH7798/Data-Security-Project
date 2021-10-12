@@ -41,6 +41,6 @@
 <div>
 
 <hr>
-<a href="/login">If you have an account, you can log in.</a>
+<a href="/login">If you have an account, you can log in.</a> <a href="/adminlogin">Admin Login</a>
 </body>
 </html>

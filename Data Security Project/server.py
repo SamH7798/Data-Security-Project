@@ -1,7 +1,7 @@
 import mysql.connector
 from bottle import route, run, template
 from bottle import get, post
-from bottle import request
+from bottle import request, redirect
 
 db = mysql.connector.connect(
     host = "localhost",
@@ -24,6 +24,7 @@ db = mysql.connector.connect(
     #print(x)
 
 #print(data[0])
+
 #string = data[0]
 #print(string)
 
@@ -33,6 +34,22 @@ mycursor = db.cursor()
 def get_index():
     return template("index")
 
+@route("/useraccount")
+def get_useraccount():
+    return template("useraccount")
+
+@route("/adminpage")
+def get_adminpage():
+    return template("adminpage")
+
+
+@get("/login")
+def get_login():
+    return template("login")
+
+@get("/adminlogin")
+def get_adminlogin():
+    return template("adminlogin")
 
 
 @post("/index")
@@ -50,12 +67,37 @@ def post_info():
     for x in range(count):
        anony_name = anony_name + '*'
 
-    mycursor.execute("INSERT INTO covidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", (anony_name,age,symthom1,symthom2))
+    mycursor.execute("INSERT INTO covidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", (name,age,symthom1,symthom2))
+    mycursor.execute("INSERT INTO publiccovidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", (anony_name,age,symthom1,symthom2))
     db.commit()
 
 
-@get("/login")
-def get_login():
-    return template("login")
+
+
+
+@post('/login')
+def post_login():
+    entered_username = request.forms['username']
+    password = request.forms['password']
+    try:  mycursor.execute("SELECT username, password from useraccounts WHERE password = " + password + " AND username = " +'"'+entered_username +'"')
+    except:  redirect('/')
+    
+    redirect('/useraccount')
+    
+
+@post('/adminlogin')
+def post_admin_login():
+        entered_username = request.forms['username']
+        password = request.forms['password']
+        try:  mycursor.execute("SELECT username, password from adminaccounts WHERE password = " + password + " AND username = " +'"'+entered_username +'"')
+        except:  redirect('/')
+    
+        redirect('/adminpage')
+
+
+
+    
+
+
 
 run(host="localhost", port=8068)

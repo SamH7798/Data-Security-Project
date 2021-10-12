@@ -10,8 +10,8 @@
 
 <body>
 <div class="container">
-  <h2>Login</h2>
-  <form action="/login" method="post">
+  <h2>Admin Login</h2>
+  <form action="/adminlogin" method="post">
     <div class="form-group">
       <label for="username">Name:</label>
       <input type="text" class="form-control" id="username" name="username" placeholder="Enter name"/>
@@ -21,12 +21,10 @@
       <input type="password" class="form-control" id="password" name="password" placeholder="Enter password"/>    
     </div>
 
-
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
 <div>
 <hr>
-<a href="/signup">If you want access to stastical information you can request access</a>
 
 
 </div>
@@ -34,4 +32,3 @@
 
 </body>
 </html>
-
