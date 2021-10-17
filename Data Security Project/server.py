@@ -2,6 +2,9 @@ import mysql.connector
 from bottle import route, run, template
 from bottle import get, post
 from bottle import request, redirect
+import smtplib
+import string
+import random
 
 db = mysql.connector.connect(
     host = "localhost",
@@ -10,6 +13,11 @@ db = mysql.connector.connect(
     database = "dataproject"
     )
 
+
+## access code generator
+
+def access_code_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 #mycursor = db.cursor()
 
@@ -28,7 +36,7 @@ db = mysql.connector.connect(
 #string = data[0]
 #print(string)
 
-mycursor = db.cursor()
+mycursor = db.cursor(buffered=True)
 
 @route("/")
 def get_index():
@@ -40,7 +48,28 @@ def get_useraccount():
 
 @route("/adminpage")
 def get_adminpage():
-    return template("adminpage")
+
+    mycursor.execute('SELECT fullname FROM request')
+    request_names = []
+    ## cleaning up string in table
+    for x in mycursor:
+        name = ""
+        for j in str(x):
+            if j !='(' and j !=')' and j !=',':
+                name = name + j
+        request_names.append(name)
+
+    #print(data)
+    emails = []
+    mycursor.execute('SELECT email FROM request')
+    for x in mycursor:
+        email = ""
+        for j in str(x):
+            if j !='(' and j !=')' and j !=',':
+                email = email + j
+        emails.append(email)
+
+    return template("adminpage", names = request_names, emails = emails)
 
 
 @get("/login")
@@ -51,6 +80,17 @@ def get_login():
 def get_adminlogin():
     return template("adminlogin")
 
+@get("/request")
+def get_request():
+    return template("request")
+
+@get("/accesspage")
+def get_acess():
+    return template("accesspage")
+
+@get("/signup")
+def get_signup():
+    return template("signup")
 
 @post("/index")
 def post_info():
@@ -96,8 +136,67 @@ def post_admin_login():
 
 
 
-    
+@post('/request')
+def post_request():
+    print("hello")
+    name = request.forms['name']
+    email = request.forms['email']
+    mycursor.execute("INSERT INTO request (fullname, email) VALUES(%s,%s)", (name,email))
+    db.commit()
 
+    redirect('/request')
+
+
+@post('/grant_request')
+def post_request():
+    request_email = request.forms['email']
+    
+    adminEmail = "kentprojectemail@gmail.com"
+    emailPassword = ""
+
+    access_code = access_code_generator()    
+    message = "access = "+ access_code
+    print(access_code)
+
+    mycursor.execute("INSERT INTO accesscodes (accesscode) VALUES(%s)", (access_code,))
+    db.commit()
+
+    ## remeber to delete granted request
+
+    #print(message)
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(adminEmail, emailPassword)
+    server.sendmail(adminEmail,request_email, message)
+
+    redirect('/adminpage')
+
+@post('/accesspage')
+def post_check_access():
+    entered_code = request.forms['code']
+    print(entered_code)
+
+    try:  mycursor.execute("SELECT accesscode from accesscodes WHERE accesscode = "+ '"'+ entered_code + '"')
+    except:  redirect('/accesspage')
+    print(entered_code)
+
+    mycursor.execute("DELETE FROM accesscodes WHERE accesscode = "+ '"'+ entered_code + '"')
+    db.commit()
+
+    redirect('/signup')
+
+   
+@post('/signup')
+def post_signup():
+    username = request.forms['username']
+    password = request.forms['password']
+    name = request.forms['name']
+    email = request.forms['email']
+
+    mycursor.execute("INSERT INTO useraccounts (username, password, name ,email) VALUES(%s,%s,%s,%s)", (username,password,name,email))
+    db.commit()
+
+    redirect('/login')
 
 
 run(host="localhost", port=8068)
