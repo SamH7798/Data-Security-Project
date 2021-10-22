@@ -46,6 +46,7 @@ def get_index():
 def get_useraccount():
     return template("useraccount")
 
+## routes to the admin page and can admin can view requests
 @route("/adminpage")
 def get_adminpage():
 
@@ -71,10 +72,56 @@ def get_adminpage():
 
     return template("adminpage", names = request_names, emails = emails)
 
+# routes to user account and 
+@route("/useraccount")
+def get_useraccount():
+    names = []
+    ages = []
+    symthom1s = []
+    symthom2s = []
+    mycursor.execute('SELECT name FROM publiccovidinfo')
+
+    ## cleaning up strings for names list
+    for x in mycursor:
+        name = ""
+        for j in str(x):
+            if j !='(' and j !=')' and j !=',':
+                name = name + j
+        names.append(name)
+ 
+    mycursor.execute('SELECT age FROM publiccovidinfo')
+    for x in mycursor:
+        age = ""
+        for j in str(x):
+            if j !='(' and j !=')' and j !=',':
+                age = age + j
+        ages.append(age)
+
+    mycursor.execute('SELECT symthom1 FROM publiccovidinfo')
+    for x in mycursor:
+        symthom = ""
+        for j in str(x):
+            if j !='(' and j !=')' and j !=',':
+                symthom = symthom + j
+        symthom1s.append(symthom)
+
+    mycursor.execute('SELECT symthom2 FROM publiccovidinfo')
+    for x in mycursor:
+        symthom = ""
+        for j in str(x):
+            if j !='(' and j !=')' and j !=',':
+                symthom = symthom + j
+        symthom2s.append(symthom)
+
+    return template("useraccount", names = names, ages = ages, symthom1s = symthom1s, symthom2s  = symthom2s)
+        
+    
+
+
 
 @get("/login")
 def get_login():
-    return template("login")
+    return template("login") 
 
 @get("/adminlogin")
 def get_adminlogin():
@@ -92,6 +139,8 @@ def get_acess():
 def get_signup():
     return template("signup")
 
+## gets covid info from index page to be put into 2 tables
+#1 table is the private table another if a public table
 @post("/index")
 def post_info():
     name = request.forms['fullname']
@@ -99,17 +148,11 @@ def post_info():
     symthom1 = request.forms['symthom1']
     symthom2 = request.forms['symthom2']
     
-    anony_name = ""
-    count = 0
-    for x in name:
-        count = count + 1
-
-    for x in range(count):
-       anony_name = anony_name + '*'
 
     mycursor.execute("INSERT INTO covidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", (name,age,symthom1,symthom2))
-    mycursor.execute("INSERT INTO publiccovidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", (anony_name,age,symthom1,symthom2))
+    mycursor.execute("INSERT INTO publiccovidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", ('*',age,symthom1,symthom2))
     db.commit()
+    redirect('/')
 
 
 
@@ -120,8 +163,9 @@ def post_login():
     entered_username = request.forms['username']
     password = request.forms['password']
     try:  mycursor.execute("SELECT username, password from useraccounts WHERE password = " + password + " AND username = " +'"'+entered_username +'"')
-    except:  redirect('/')
+    except:  return template('login')
     
+
     redirect('/useraccount')
     
 
@@ -130,15 +174,14 @@ def post_admin_login():
         entered_username = request.forms['username']
         password = request.forms['password']
         try:  mycursor.execute("SELECT username, password from adminaccounts WHERE password = " + password + " AND username = " +'"'+entered_username +'"')
-        except:  redirect('/')
+        except:  redirect('/adminlogin')
     
         redirect('/adminpage')
 
 
-
+#puts info into request table for admin to see
 @post('/request')
 def post_request():
-    print("hello")
     name = request.forms['name']
     email = request.forms['email']
     mycursor.execute("INSERT INTO request (fullname, email) VALUES(%s,%s)", (name,email))
@@ -146,13 +189,14 @@ def post_request():
 
     redirect('/request')
 
-
+## sends an email to whoever is granted access
+# this is post admin page 
 @post('/grant_request')
 def post_request():
     request_email = request.forms['email']
     
     adminEmail = "kentprojectemail@gmail.com"
-    emailPassword = ""
+    emailPassword = "kentstate"
 
     access_code = access_code_generator()    
     message = "access = "+ access_code
@@ -161,8 +205,9 @@ def post_request():
     mycursor.execute("INSERT INTO accesscodes (accesscode) VALUES(%s)", (access_code,))
     db.commit()
 
-    ## remeber to delete granted request
-
+    ## Deletes certain request when granted
+    mycursor.execute("DELETE FROM request WHERE email = "+ '"'+ request_email + '"')
+    db.commit()
     #print(message)
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
@@ -171,21 +216,30 @@ def post_request():
 
     redirect('/adminpage')
 
+## access code is entered and if entered right user is redirected to signup
 @post('/accesspage')
 def post_check_access():
     entered_code = request.forms['code']
-    print(entered_code)
 
-    try:  mycursor.execute("SELECT accesscode from accesscodes WHERE accesscode = "+ '"'+ entered_code + '"')
-    except:  redirect('/accesspage')
-    print(entered_code)
+    try: mycursor.execute("SELECT accesscode from accesscodes WHERE accesscode = "+ '"'+ entered_code + '"')
+    except: redirect('/accesspage')
+    
+    l = []
+    for x in mycursor:
+        l.append(x)
+    
+   # x = mycursor.execute("SELECT accesscode from accesscodes WHERE accesscode = "+ '"'+ entered_code + '"')
 
     mycursor.execute("DELETE FROM accesscodes WHERE accesscode = "+ '"'+ entered_code + '"')
     db.commit()
 
-    redirect('/signup')
+    if len(l) != 0:
+        redirect('/signup')
+    else:
+        redirect('/accesspage')
+        
 
-   
+## enters new account information into useraccounts table
 @post('/signup')
 def post_signup():
     username = request.forms['username']
@@ -200,3 +254,4 @@ def post_signup():
 
 
 run(host="localhost", port=8068)
+
