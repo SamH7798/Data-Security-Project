@@ -148,9 +148,43 @@ def post_info():
     symthom1 = request.forms['symthom1']
     symthom2 = request.forms['symthom2']
     
+    #generalizing information
+    int_age = int(age)
+    general_age =''
+
+    print(type(int_age))
+    if int_age < 10:
+        general_age = '0 - 10'
+
+    if int_age > 10 and int_age < 20:
+        general_age = '11 - 19'
+
+    if int_age > 20 and int_age < 30:
+        general_age = '21 - 30'
+
+    if int_age > 30 and int_age < 40:
+        general_age = '31 - 40'
+
+    if int_age > 40 and int_age < 50:
+        general_age = '41 - 50'
+    
+    if int_age > 50 and int_age < 60:
+        general_age = '51 - 60'
+
+    if int_age > 60 and int_age < 70:
+        general_age = '61 - 70'
+    
+    if int_age > 80:
+        general_age = '80 - 100'
+
+    
+
+    
+
+    
 
     mycursor.execute("INSERT INTO covidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", (name,age,symthom1,symthom2))
-    mycursor.execute("INSERT INTO publiccovidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", ('*',age,symthom1,symthom2))
+    mycursor.execute("INSERT INTO publiccovidinfo (name, age,symthom1,symthom2) VALUES(%s,%s,%s,%s)", ('*',general_age,symthom1,symthom2))
     db.commit()
     redirect('/')
 
