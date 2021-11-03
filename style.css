@@ -1,0 +1,120 @@
+*{
+    box-sizing:border-box;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    background-color: #f8f8ff;
+}
+.navStyler ul{
+    margin:0;
+}
+.navStyler li{
+    display: inline;
+}
+
+.navStyler a{
+    display: inline-block;
+    padding:.5em;
+    font-size: 1.3em;
+    color:white;
+    text-decoration: none;
+}
+.navStyler a:hover{
+background-color: rgba(255,255,255,.3);
+}
+.nav{
+    text-align: center;
+    font-size: 1.1em;
+    font-weight:lighter;
+    border-bottom: 1px solid rgba(255,255,255,.3);
+}
+.nav li{
+    padding:0 2%;
+}
+.mainHeader{
+    background-color: rgba(0,0,0,.4);
+    background-image: url("Images/blue-covid-banner.webp");
+    background-blend-mode: multiply;
+    background-size: cover;
+    padding-bottom: 30px;
+}
+.covidTitle{
+    text-align:center;
+    margin:0;
+    font-size:4em;
+    font-family:fantasy;
+    color:white;
+}
+.covidFootertitle{
+    text-align:center;
+    margin:0;
+    font-size:1.3em;
+    font-family:fantasy;
+    color:white;
+}
+.covidDetails{
+    margin: 1em;
+}
+
+.dropDown{
+    max-width: 900px;
+    margin:0 auto;
+}
+.infoHeaders{
+    text-align: center;
+    font-size:2.5em;
+}
+
+.covidFooter{
+    text-align:center;
+    margin:0;
+    font-size: 1.5em;
+    color:white;
+}
+
+.alignImg{
+    display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+.navFooter ul{
+    margin:0;
+}
+.navFooter li{
+    display: inline;
+}
+.navFooter a{
+    display: inline-block;
+    padding:.5em;
+    font-size: 1.2em;
+    color:white;
+    text-decoration: none;
+}
+.navFooter a:hover{
+    background-color: rgba(255,255,255,.3);
+    }
+    .navF{
+        text-align: center;
+        font-size: 1.1em;
+        font-weight:lighter;
+    }
+    .pPadding{
+        padding:0;
+        margin: 6px;
+        font-size: 1.8em;
+        text-align: center;
+        color:white;
+    }
+    p{
+        font-size:1.2em;
+    }
+    h3{
+        font-size:1.2em;
+    }
+    li{
+        font-size:1.2em;
+    }
