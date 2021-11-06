@@ -1,3 +1,4 @@
+from typing import Counter
 import mysql.connector
 from bottle import route, run, template
 from bottle import get, post
@@ -18,6 +19,43 @@ db = mysql.connector.connect(
 
 def access_code_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
+
+
+def k_anonymity(counter, age):
+    general_age = str(age)
+    if counter < 3:
+            if age < 10:
+                general_age = '>0'
+
+            if age > 10 and age < 20:
+                general_age = '>10'
+
+            if age > 20 and age < 30:
+                general_age = '>20'
+
+            if age > 30 and age < 40:
+                general_age = '>30'
+
+            if age > 40 and age < 50:
+                general_age = '>40'
+            
+            if age > 50 and age < 60:
+                general_age = '>50'
+
+            if age > 60 and age < 70:
+                general_age = '>60'
+            
+            if age >= 80:
+                general_age = '>70'
+        
+    else:
+        general_age = general_age[:-1]
+        general_age = general_age + '*'
+       # print("Past 3 = " + general_age)
+
+
+    return general_age
+
 
 #mycursor = db.cursor()
 
@@ -141,41 +179,28 @@ def get_signup():
 
 ## gets covid info from index page to be put into 2 tables
 #1 table is the private table another if a public table
+
+counter = 0
 @post("/index")
 def post_info():
     name = request.forms['fullname']
     age = request.forms['age']
     symthom1 = request.forms['symthom1']
     symthom2 = request.forms['symthom2']
-    
+    global counter
+
     #generalizing information
     int_age = int(age)
     general_age =''
 
     print(type(int_age))
-    if int_age < 10:
-        general_age = '0 - 10'
 
-    if int_age > 10 and int_age < 20:
-        general_age = '11 - 19'
+    if counter == 6:
+        counter = 0
+    ##0-------------------------------
+    general_age = k_anonymity(counter, int_age)
 
-    if int_age > 20 and int_age < 30:
-        general_age = '21 - 30'
-
-    if int_age > 30 and int_age < 40:
-        general_age = '31 - 40'
-
-    if int_age > 40 and int_age < 50:
-        general_age = '41 - 50'
-    
-    if int_age > 50 and int_age < 60:
-        general_age = '51 - 60'
-
-    if int_age > 60 and int_age < 70:
-        general_age = '61 - 70'
-    
-    if int_age > 80:
-        general_age = '80 - 100'
+    counter = counter + 1
 
     
 
@@ -288,4 +313,5 @@ def post_signup():
 
 
 run(host="localhost", port=8068)
+
 
